@@ -3,8 +3,24 @@ var fs = require('fs');
 var path = require('path');
 
 var faker = require('faker');
-var puppeteer = require('puppeteer');
+var puppeteer = require('puppeteer-extra');
 
+var StealthPlugin = require('puppeteer-extra-plugin-stealth')
+puppeteer.use(StealthPlugin());
+
+var RecaptchaPlugin = require('puppeteer-extra-plugin-recaptcha')
+puppeteer.use(
+  RecaptchaPlugin({
+    provider: {
+      id: '2captcha',
+      token: process.argv[2]
+    },
+    // colorize reCAPTCHAs (violet = detected, green = solved)
+    visualFeedback: true
+  })
+);
+
+var log = function(...args) { console.log(new Date(), ...args); };
 var { fillInData } = require('./source');
 var { randomWord } = require('./random-words');
 var { getNextBusiness } = require('./businesses');
@@ -21,11 +37,14 @@ async function step(page) {
   const client = await page.target().createCDPSession();
   await client.send('Network.clearBrowserCookies');
   await client.send('Network.clearBrowserCache');
+  log('cleared cookies');
 
   var url = 'https://secure.jfs.ohio.gov/covid-19-fraud/';
   await page.goto(url, { waitUntil: 'networkidle2' });
 
   var fillInDataArguments = await genData();
+  log('genData:', fillInDataArguments);
+
   await page.evaluate(function fillInData(EmployerName, Email,
       EmployerNumber, EmployerAddress, EmployerCity, EmployerZip,
       EmployeeFirstName, EmployeeLastName) {
@@ -45,6 +64,14 @@ async function step(page) {
     fillAndClick('EmployerAddress', EmployerAddress)
     fillAndClick('EmployerCity', EmployerCity)
     fillAndClick('EmployerZip', EmployerZip)
+    document.querySelector("#EmployerState").selectedIndex = 44;
+
+    var integerBetween = (min, max) =>
+      Math.floor(Math.random() * (max - min + 1) + min);
+
+    var numberOfCounties = 89;
+    document.querySelector("#EmployerCounty").selectedIndex
+      = integerBetween(0, numberOfCounties);
 
     // clicks on things
     var clicks = ['ID0E1EAE', 'ID0EDJAE', 'ID0EWOAE', 'ID0E3TAE', 'ID0EVXAE'];
@@ -55,25 +82,22 @@ async function step(page) {
     document.querySelector('#EmployeeLastName').value = EmployeeLastName;
   }, ...fillInDataArguments);
 
-  // CAPTCHA LOGIC HERE
+  console.log('solving');
+  console.time('solved');
+  await page.solveRecaptchas();
+  console.timeEnd('solved');
 
-  // document.documentElement scrollHeight/Width 1530, 785
-  /**
-    var body = document.body,
-    html = document.documentElement;
+  await page.evaluate(() => {
+    document.querySelector('input[value="Send Message"]').click();
+  });
 
-    var height = Math.max( body.scrollHeight, body.offsetHeight, 
-                           html.clientHeight, html.scrollHeight, html.offsetHeight );
-  */
-
-  // x: 41, y = 1530 - 186
-  // page.mouse.click(41, 1530 - 186).then(console.log)
+  log('Sent: Helped someone keep unemployment benefits.');
 }
 
 async function main(argv = process.argv) {
   var browser = await puppeteer.launch({
-    args: ['--disable-infobars ','--disable-web-security']
-    headless: false
+    args: ['--disable-infobars ','--disable-web-security'],
+    headless: true
   });
 
   var page = await browser.newPage();

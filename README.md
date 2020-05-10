@@ -39,7 +39,7 @@ screen
 
 hit space, you are now in a screen session
 ```
-ohio-covid
+ohio-covid-toolkit
 ```
 
 then hit `Ctrl A` + `Ctrl D` to jump out, and `screen -r` puts you back in.
