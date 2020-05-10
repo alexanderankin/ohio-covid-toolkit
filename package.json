@@ -1,6 +1,6 @@
 {
   "name": "ohio-covid-toolkit",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "main": "source.js",
   "license": "MIT",
   "dependencies": {
@@ -20,5 +20,9 @@
     "**/*.js*",
     "words",
     "README.md"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexanderankin/ohio-covid-toolkit"
+  }
 }
