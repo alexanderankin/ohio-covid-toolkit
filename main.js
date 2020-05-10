@@ -33,7 +33,7 @@ async function genData() {
   return d;
 }
 
-async function step(page) {
+async function step(page, stepNumber) {
   const client = await page.target().createCDPSession();
   await client.send('Network.clearBrowserCookies');
   await client.send('Network.clearBrowserCache');
@@ -91,7 +91,7 @@ async function step(page) {
     document.querySelector('input[value="Send Message"]').click();
   });
 
-  log('Sent: Helped someone keep unemployment benefits.');
+  log('Sent: Helped someone (' + stepNumber + ') keep unemployment benefits.');
 }
 
 async function main(argv = process.argv) {
@@ -102,13 +102,11 @@ async function main(argv = process.argv) {
 
   var page = await browser.newPage();
 
-  for (;;) {
-    await step(page);
-    require('repl').start().context.page = page;
-    break;
+  for (var i = 1;; i++) {
+    await step(page, i);
   }
 
-  // await browser.close();
+  await browser.close();
 }
 
 module.exports = { main };
