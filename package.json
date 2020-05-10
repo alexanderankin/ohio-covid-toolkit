@@ -1,0 +1,22 @@
+{
+  "name": "ohio-covid-toolkit",
+  "version": "1.0.4",
+  "main": "source.js",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "cheerio": "^1.0.0-rc.3",
+    "faker": "^4.1.0",
+    "parse-address": "^1.1.2",
+    "puppeteer": "^3.0.3"
+  },
+  "bin": {
+    "ohio-covid": "main.js",
+    "ohio-covid-toolkit": "main.js"
+  },
+  "files": [
+    "**/*.js*",
+    "words",
+    "README.md"
+  ]
+}
