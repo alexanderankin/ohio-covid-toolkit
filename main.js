@@ -102,6 +102,7 @@ async function step(page, stepNumber) {
     const unsolvableError = Boolean(recaptcha.error.error.contains('ERROR_CAPTCHA_UNSOLVABLE'))
     if (unsolvableError) {
       warn(recaptcha.error.error)
+      return
     }
     else {
       throw Error(recaptcha.error.error);
