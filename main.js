@@ -20,6 +20,10 @@ var error = function (...args) {
   console.error(colors.red(...args));
 };
 
+var warn = function (...args) {
+  console.log(colors.yellow(...args));
+};
+
 var { fillInData } = require('./source');
 var { randomWord } = require('./random-words');
 var { getNextBusiness } = require('./businesses');
@@ -95,7 +99,13 @@ async function step(page, stepNumber) {
   var recaptcha = await page.solveRecaptchas();
 
   if (recaptcha.error) {
-    throw Error(recaptcha.error.error);
+    const unsolvableError = Boolean(recaptcha.error.error.contains('ERROR_CAPTCHA_UNSOLVABLE'))
+    if (unsolvableError) {
+      warn(recaptcha.error.error)
+    }
+    else {
+      throw Error(recaptcha.error.error);
+    }
   }
   console.timeEnd('solved');
 
