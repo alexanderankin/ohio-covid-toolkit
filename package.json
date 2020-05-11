@@ -6,7 +6,9 @@
   "dependencies": {
     "axios": "^0.19.2",
     "cheerio": "^1.0.0-rc.3",
+    "colors": "^1.4.0",
     "faker": "^4.1.0",
+    "nodemon": "^2.0.3",
     "parse-address": "^1.1.2",
     "puppeteer": "^3.0.4",
     "puppeteer-extra": "^3.1.9",
@@ -15,6 +17,10 @@
   },
   "bin": {
     "ohio-covid-toolkit": "main.js"
+  },
+  "scripts": {
+    "start": "node main.js",
+    "watch": "nodemon main.js"
   },
   "files": [
     "**/*.js*",
