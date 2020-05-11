@@ -99,7 +99,6 @@ async function step(page, stepNumber) {
   }
   console.timeEnd('solved');
 
-  log('recaptcha', recaptcha);
   await page.evaluate(() => {
     document.querySelector('input[value="Send Message"]').click();
   });
