@@ -1,32 +1,25 @@
 #!/usr/bin/env node
 var fs = require('fs');
 var path = require('path');
-
+var colors = require('colors/safe');
 var faker = require('faker');
 var puppeteer = require('puppeteer-extra');
 
-var StealthPlugin = require('puppeteer-extra-plugin-stealth')
+var StealthPlugin = require('puppeteer-extra-plugin-stealth');
 puppeteer.use(StealthPlugin());
 
-function complainNoAPIKey() {
-  console.error('Missing 2CAPTCHA_API_KEY!');
-  console.error('Usage: ohio-covid-toolkit 2CAPTCHA_API_KEY');
-  process.exit(1);
-}
+var args = process.argv.slice(2);
 
-var RecaptchaPlugin = require('puppeteer-extra-plugin-recaptcha')
-puppeteer.use(
-  RecaptchaPlugin({
-    provider: {
-      id: '2captcha',
-      token: process.argv[2] || complainNoAPIKey(),
-    },
-    // colorize reCAPTCHAs (violet = detected, green = solved)
-    visualFeedback: true,
-  })
-);
+var RecaptchaPlugin = require('puppeteer-extra-plugin-recaptcha');
 
-var log = function(...args) { console.log(new Date(), ...args); };
+var log = function (...args) {
+  console.log(new Date(), ...args);
+};
+
+var error = function (...args) {
+  console.error(colors.red(...args));
+};
+
 var { fillInData } = require('./source');
 var { randomWord } = require('./random-words');
 var { getNextBusiness } = require('./businesses');
@@ -94,8 +87,8 @@ async function step(page, stepNumber) {
     // EmployeeFirstName, EmployeeLastName
     document.querySelector('#EmployeeFirstName').value = EmployeeFirstName;
     document.querySelector('#EmployeeLastName').value = EmployeeLastName;
-  }, ...fillInDataArguments);
-
+  },
+  ...fillInDataArguments);
   log('solving');
   console.time('solved');
 
@@ -106,7 +99,6 @@ async function step(page, stepNumber) {
   }
   console.timeEnd('solved');
 
-  log('recaptcha', recaptcha);
   await page.evaluate(() => {
     document.querySelector('input[value="Send Message"]').click();
   });
@@ -116,13 +108,31 @@ async function step(page, stepNumber) {
 
 function quit(browser) {
   return async () => {
-    await browser.close();
+    if (browser) {
+      await browser.close();
+    }
     process.exit(1);
   };
 }
 
-async function main(argv = process.argv) {
+async function main(argv = args) {
   try {
+    var apitoken = argv[0];
+    if (!apitoken) {
+      throw new Error(
+        'No captcha2 api token supplied\n\nUsage: ohio-covid-toolkit <api token>\n'
+      );
+    }
+    puppeteer.use(
+      RecaptchaPlugin({
+        provider: {
+          id: '2captcha',
+          token: apitoken,
+        },
+        // colorize reCAPTCHAs (violet = detected, green = solved)
+        visualFeedback: true,
+      })
+    );
     var browser = await puppeteer.launch({
       args: ['--disable-infobars ', '--disable-web-security'],
       headless: true,
@@ -137,7 +147,7 @@ async function main(argv = process.argv) {
       await step(page, i);
     }
   } catch (err) {
-    log('There was an error ');
+    error(err.message);
     await quit(browser)();
   }
 }
