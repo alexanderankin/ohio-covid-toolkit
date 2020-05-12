@@ -6,6 +6,8 @@ var cheerio = require('cheerio');
 var faker = require('faker');
 var { parseLocation } = require('parse-address'); 
 
+var { integerBetween } = require('./source')
+
 async function getSearchTerm(term) {
   var { data } = await axios({
     method: 'post',
@@ -42,6 +44,7 @@ async function getBusinessInfo(url) {
   var email = nameToEmail(name);
   return { name, email, addr, city, zip };
 }
+const employerEmailDomains = [ "yahoo", "gmail", "hotmail"]
 
 function getClassicEmailName() {
   var emails = [ "jobs", "work", "info", "management", "careers" ];
@@ -49,14 +52,16 @@ function getClassicEmailName() {
 }
 
 function nameToEmail(name) {
-  if (Math.random() > 0.5)
+  var rand = integerBetween(1,7)
+  var isException = !Boolean(rand % 3)
+  if (isException)
     var prefix = getClassicEmailName();
   else
     var prefix = faker.internet.userName();
 
   var parts = name.split(/[^\w+]/);
   var numKeep = Math.max(3, Math.ceil(parts.length * .75));
-  var domain = parts.slice(0, numKeep).join('') + '.com';
+  var domain = isException ? parts.slice(0, numKeep).join('').toLowerCase() + '.com' : employerEmailDomains[~~(Math.random() * employerEmailDomains.length)] + ".com";
   return [ prefix, domain ].join('@');
 }
 

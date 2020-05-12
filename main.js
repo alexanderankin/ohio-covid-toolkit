@@ -99,7 +99,7 @@ async function step(page, stepNumber) {
   var recaptcha = await page.solveRecaptchas();
 
   if (recaptcha.error) {
-    const unsolvableError = Boolean(recaptcha.error.error.contains('ERROR_CAPTCHA_UNSOLVABLE'))
+    const unsolvableError = Boolean(recaptcha.error.error.match('ERROR_CAPTCHA_UNSOLVABLE'))
     if (unsolvableError) {
       warn(recaptcha.error.error)
       return
