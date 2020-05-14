@@ -1,6 +1,8 @@
 // submits junk data to
 // https://secure.jfs.ohio.gov/covid-19-fraud/
 
+const faker = require('faker')
+
 const large_ohio_companies = [
   "Kroger",
   "Macy’s",
@@ -111,12 +113,24 @@ function integerBetween(min, max) {
   )
 }
 
-const employerEmailPrefixes = [ "jobs", "work", "info", "management", "careers" ]
+const employerEmailDomains = [ "yahoo", "gmail", "hotmal"]
 
-function companyNametoFakeEmail(name) {
-  var prefix = employerEmailPrefixes[~~(Math.random() * employerEmailPrefixes.length)];
-  var fakeDomain = name.replace(/[^\w]+/g, '').toLowerCase() + ".com";
-  return prefix + "@" + fakeDomain;
+function getRandSeperator() {
+  const val = integerBetween(1,4)
+  switch (val) {
+    case 1:
+      return '.'
+    case 3:
+      return '_'
+    case 4:
+      return ''
+  }
+}
+
+function companyNametoFakeEmail(name, personName) {
+  var rand = integerBetween(1,3)
+  var suffix = rand % 3 ? name.replace(/[^\w]+/g, '').toLowerCase() + ".com" : employerEmailDomains[~~(Math.random() * employerEmailDomains.length)] + ".com";
+  return personName[0] + getRandSeperator() + personName[1] + "@" + suffix;
 }
 
 function GetFakeEmployerIdNumber() {
@@ -148,7 +162,7 @@ function fillInData(EmployerName, Email, EmployerNumber, EmployerAddress,
   // fillEmployeeName();
 }
 
-function setEmployerNameandEmail() {
+function setEmployerNameandEmail(name) {
   var employerName = large_ohio_companies[~~(Math.random() * large_ohio_companies.length)];
 
   var employerNameField = document.querySelector("#EmployerName");
@@ -156,7 +170,7 @@ function setEmployerNameandEmail() {
   employerNameField.click();
 
   var employerEmailField = document.querySelector("#Email");
-  employerEmailField.value = companyNametoFakeEmail(employerName);
+  employerEmailField.value = companyNametoFakeEmail(employerName, name);
   employerEmailField.click();
 
   var employerNumberField = document.querySelector("#EmployerNumber");
@@ -203,21 +217,20 @@ function fillMiscData() {
   document.querySelector("#ID0EVXAE").click();
 }
 
-const fakeNames = [
-  ["Myrna","Hirthe"],["Ruby","Johnston"],["Retha","Crona"],["Stefan","Torp"],["Zetta","DuBuque"],["Louisa","Schmidt"],["Wade","Brown"],["Tyrel","Hudson"],["Isabel","McCullough"],["Rey","Zemlak"],["Erica","Jenkins","V"],["Litzy","McCullough"],["Dedrick","Stamm"],["Kendra","Cartwright"],["Robbie","Fay"],["Micah","Dooley"],["Armand","Schiller"],["Presley","Torphy"],["Jordyn","Hermiston"],["Bianka","Lakin"],["Laurie","Pfeffer"],["Mattie","Goyette"],["Rylee","Stanton"],["Mrs.","Rhianna","Welch"],["Charlene","Beahan"],["Idell","Macejkovic","I"],["Ross","Guªann"],["Emmitt","Denesik"],["Bernadine","Wiegand"],["Mr.","Aryanna","Towne"],["Albin","Weber"],["Jaylen","Grimes"],["Hilda","Wolff"],["Angelina","White"],["Mrs.","Lew","Bradtke"],["Lorena","Batz"],["Pat","Lueilwitz"],["Minerva","Rippin"],["Amalia","Beatty"],["Reed","Ebert","V"],["Ramiro","Kreiger"],["Hertha","Fadel"],["Nona","Spinka"],["Charley","Pollich"],["Tracey","Pagac"],["Lazaro","Mraz"],["Mrs.","Jeanie","Willms"],["Cecilia","Harann","PhD"],["Davin","Batz"],["Geo","Christiansen"],["Rupert","Predovic"],["Quincy","Franecki"],["Alexys","Morar"],["Thad","Hahn"],["Bobby","Rath"],["Kaley","Cassin"],["Marcel","Greenfelder"],["Dustin","Lang"],["Willa","Zemlak"],["Shirley","Lowe"],["Zackary","Mosciski"],["Elisha","Stanton"],["Miss","Dawn","Flatley"],["Nia","Wolf"],["Nicholaus","Funk"],["Francesca","Murray"],["Luna","Auer"],["Dudley","Parker"],["Katharina","Spencer"],["Leonora","Roberts"],["Eldora","Metz"],["Sofia","Roob"],["Damian","Lakin"],["Mrs.","Trinity","Rath"],["Dameon","Kirlin"],["Alessandra","Ortiz"],["Mitchell","Bernhard"],["Montana","Auer"],["Ryan","Cormier"],["Viviane","Predovic"],["Dr.","Hayden","Kuvalis"],["Mabelle","Torp"],["Arlene","Gutkowski"],["Tess","Cummerata"],["Ellis","Gleichner"],["Noel","Larkin"],["Felipe","Okuneva"],["Leora","Fisher"],["Bernardo","Lowe"],["Maryjane","Windler"],["Keeley","Stark"],["Moises","Stokes"],["Layne","Harªann"],["Cleveland","Kris"],["Carlotta","Homenick"],["Nella","Klein"],["Columbus","Muller"],["Delbert","Yost"],["Evert","Guann"],["Ashleigh","Gulgowski"]
-];
-
 function fillEmployeeName(){
-  var names = fakeNames[~~(Math.random() * fakeNames.length)];
+  var names = faker.name.findName().split(' ')
+  console.log(names)
   document.querySelector("#EmployeeFirstName").value = names[0];
   document.querySelector("#EmployeeLastName").value = names[1];
+  return [names[0], names[1]]
 }
 
 function fillPage() {
-  setEmployerNameandEmail();
+
   setAddressData();
   fillMiscData();
-  fillEmployeeName();
+  const names = fillEmployeeName();
+  setEmployerNameandEmail(names);
 }
 
 
@@ -284,9 +297,8 @@ if (typeof window !== 'undefined') {
   window.fillPageAndSubmit = fillPageAndSubmit;
 
   window.large_ohio_companies = large_ohio_companies;
-  window.employerEmailPrefixes = employerEmailPrefixes;
+  window.employerEmailDomains = employerEmailDomains;
   window.addressData = addressData;
-  window.fakeNames = fakeNames;
   window.captchas = captchas;
 } else {
   module.exports = {
@@ -303,9 +315,8 @@ if (typeof window !== 'undefined') {
     fillPageAndSubmit,
 
     large_ohio_companies,
-    employerEmailPrefixes,
+    employerEmailDomains,
     addressData,
-    fakeNames,
     captchas,
   };
 }
