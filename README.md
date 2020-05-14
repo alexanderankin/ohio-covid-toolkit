@@ -1,5 +1,7 @@
 # Ohio Covid 19 Toolkit
 
+**UPDATE 5/14/2020:** [https://secure.jfs.ohio.gov/covid-19-fraud/](https://secure.jfs.ohio.gov/covid-19-fraud/) is down!
+
 The site maintainers upgraded the form to add a recaptcha.
 
 In order to circumvent this, you'll need to [create a 2Captcha account and buy credits](https://2captcha.com/).
